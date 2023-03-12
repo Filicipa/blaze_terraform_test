@@ -1,11 +1,4 @@
 terraform {
-  cloud {
-    organization = "blaze-prod"
-    workspaces {
-      name = "learn-tfc-aws"
-    }
-  }
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -16,14 +9,18 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region = var.region
 }
 
 resource "aws_instance" "app_server" {
-  ami           = "ami-0a261c0e5f51090b1"
-  instance_type = "t2.micro"
-
+  ami               = var.ami_id #Ubuntu server
+  instance_type     = var.inst_type
+  security_group_id = aws_security_group.this.id
+  root_block_device {
+    volume_size = 10
+    volume_type = "gp2"
+  }
   tags = {
-    Name = var.instance_name
+    Name = "${var.appname}-instance"
   }
 }
