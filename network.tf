@@ -1,11 +1,14 @@
-resource "aws_vpc" "this" {
-  cidr_block = "192.168.0.0/16"
+resource "aws_default_vpc" "this" {
+  #  cidr_block = var.cidr_vpc
+  tags = {
+    Name = "${var.appname}-VPC"
+  }
 }
 
 resource "aws_security_group" "this" {
   name        = "${var.appname}-sg"
   description = "Security Group for test ${var.appname}"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_default_vpc.this.id
 }
 
 resource "aws_security_group_rule" "access_from_internet" {
@@ -21,20 +24,20 @@ resource "aws_security_group_rule" "access_from_internet" {
 
 resource "aws_security_group_rule" "access_from_vpc" {
   security_group_id = aws_security_group.this.id
-  type              = "ingress"
-  from_port         = -1
-  to_port           = -1
   description       = "Allow connecting from VPC"
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "all"
+  cidr_blocks       = [aws_default_vpc.this.cidr_block]
 }
 
-resource "aws_security_group_rule" "access_from_anywhere" {
+resource "aws_security_group_rule" "access_to_anywhere" {
   security_group_id = aws_security_group.this.id
   description       = "Allow outbound traffic"
   type              = "egress"
-  from_port         = -1
-  to_port           = -1
+  from_port         = 0
+  to_port           = 0
   protocol          = "all"
   cidr_blocks       = ["0.0.0.0/0"]
 }

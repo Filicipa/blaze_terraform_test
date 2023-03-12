@@ -13,9 +13,10 @@ provider "aws" {
 }
 
 resource "aws_instance" "app_server" {
-  ami               = var.ami_id #Ubuntu server
-  instance_type     = var.inst_type
-  security_group_id = aws_security_group.this.id
+  ami                    = var.ami_id
+  instance_type          = var.inst_type
+  vpc_security_group_ids = [aws_security_group.this.id]
+  #  subnet_id              = aws_subnet.default.id
   root_block_device {
     volume_size = 10
     volume_type = "gp2"
